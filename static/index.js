@@ -1,5 +1,7 @@
 const socket = io();
 const editor = document.getElementById("editor");
+const divEditor = document.getElementById("div-editor");
+let _userId = null;
 
 // setup socket listeners
 socket.on("connect", () => {
@@ -8,6 +10,7 @@ socket.on("connect", () => {
 
 socket.on("user-connected", ({ userId }) => {
   console.log(`User connected, id: ${userId}`);
+  _userId = userId;
 });
 
 socket.on("user-disconnected", ({ userId }) => {
@@ -17,6 +20,7 @@ socket.on("user-disconnected", ({ userId }) => {
 socket.on("message", (data) => {
   if (typeof data === "string") {
     editor.value = data;
+    divEditor.innerHTML = data;
     return;
   }
 
@@ -37,6 +41,7 @@ editor.addEventListener("keyup", (event) => {
 editor.addEventListener("mouseup", (event) => {
   const { selectionStart, selectionEnd } = editor;
   if (selectionEnd - selectionStart === 0) {
+    setCursorPosition();
     return;
   }
 
@@ -45,6 +50,10 @@ editor.addEventListener("mouseup", (event) => {
     end: selectionEnd,
   };
   sendMessage("user-selected-text", selection);
+});
+
+divEditor.addEventListener("mouseup", (e) => {
+  console.log(document.getSelection());
 });
 
 // send actions
@@ -61,3 +70,5 @@ function setSelectionRange(selection) {
   console.log("setting selection", start, end);
   editor.setSelectionRange(start, end);
 }
+
+function setCursorPosition(position) {}
